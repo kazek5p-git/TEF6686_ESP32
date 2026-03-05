@@ -558,6 +558,8 @@ function T {
     }
 
     $template = [string]$dict[$Key]
+    # Translation tables use single-quoted strings, so `n stays literal unless normalized here.
+    $template = $template.Replace('`n', [Environment]::NewLine)
     if ($null -eq $Args -or $Args.Count -eq 0) { return $template }
     return [string]::Format($template, $Args)
 }
