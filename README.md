@@ -4,8 +4,6 @@
 # Note:
 The version in the repository is an ongoing development. It could and will contain bugs. To make sure you use the latest fully tested firmware, check the releases!
 
-
-
 # TEF6686_ESP32
 Advanced Tuner software for NXP TEF668x tuners with ESP32 board\
 More information: https://www.pe5pvb.nl/tef6686/
@@ -41,6 +39,11 @@ BW selector notes (important for audio navigation):
 - In short: `56 kHz` ... `311 kHz` -> `Auto` -> `iMS` -> `EQ` -> `OK`; you must confirm with `OK`, otherwise leaving the selector will not save your changes.
 - In `AM` selector, order is: AM filter values and final `OK` (last/highest-tone item).
 
+## Fork Docs
+- [Accessibility Upstream Integration Guide](docs/ACCESSIBILITY_UPSTREAM_INTEGRATION_GUIDE.md)
+- [Issue Draft: Accessibility Plan](docs/ISSUE_DRAFT_ACCESSIBILITY_PLAN.md)
+- [Fork Release Index](docs/FORK_RELEASES.md)
+
 ## Regression Checklist (2026-03-04)
 | Area | Expected behavior | Status |
 |---|---|---|
@@ -63,7 +66,7 @@ You are using our software and you found a difficulty? Please create new [issue]
 We also would like to invite you to join our Discord community where we share our ideas and help each other with some issues.\
 [<img alt="Join the TEF6686 Discord community!" src="https://i.imgur.com/lI9Tuxf.png" height="120">](https://discord.gg/ZAVNdS74mC)  
 
-Special thanks to all [contributors](https://github.com/PE5PVB/TEF6686_ESP32/graphs/contributors). You are awesome! ❤️
+Special thanks to all [contributors](https://github.com/PE5PVB/TEF6686_ESP32/graphs/contributors). You are awesome!
 ## License
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
