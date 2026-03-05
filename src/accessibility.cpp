@@ -259,9 +259,21 @@ void playAccessibilityTuneModeVoiceLite() {
 }
 
 void playAccessibilityStepSizeVoiceLite() {
-  if (!accessibilityVoiceLite) return;
   const uint8_t count = (band == BAND_SW || band < BAND_GAP) ? 5 : 4;
-  playAccessibilityVoiceLitePosition(stepsize, count, 760, 2200, 18);
+  if (accessibilityVoiceLite) {
+    playAccessibilityVoiceLitePosition(stepsize, count, 760, 2200, 18);
+    return;
+  }
+
+  // Fallback: when Voice Lite is off, still signal step position with a short menu-style cue.
+  if (!accessibilityMenuBeep || !accessibilityCueGuard()) return;
+  uint8_t pos = stepsize;
+  if (pos >= count) pos = count - 1;
+  uint16_t frequency = 760;
+  if (count > 1) {
+    frequency = 760 + static_cast<uint16_t>(((uint32_t)(2200 - 760) * pos) / (count - 1));
+  }
+  radio.tone(accessibilityCueDurationMs(accessibilityMenuCueLength, 16, 24, 34), accessibilityCueVolumeLevel(-10), frequency);
 }
 
 void playAccessibilityScanStateVoiceLite(bool start) {
