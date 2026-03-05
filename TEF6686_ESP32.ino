@@ -192,6 +192,7 @@ byte ECCold;
 byte eonptyold[20];
 byte EQset;
 byte EQsettemp;
+byte EQsetRecall;
 byte fmagc;
 byte fmscansens;
 byte fmdefaultstepsize;
@@ -215,6 +216,7 @@ byte items[11] = {10, static_cast<byte>(dynamicspi ? 10 : 9), 8, 10, 10, 10, 9, 
 byte iMSEQ;
 byte iMSset;
 byte iMSsettemp;
+byte iMSsetRecall;
 byte language;
 byte licold;
 byte longbandpress;
@@ -2654,6 +2656,23 @@ void ModeButtonPress() {
         if (menuopen && !submenu) {
           ButtonPress();
         } else if (!submenu) {
+          if (BWtune) {
+            BWtemp = BWsetRecall;
+            BWsettemp = BWsetRecall;
+            BWset = BWsetRecall;
+            iMSsettemp = iMSsetRecall;
+            EQsettemp = EQsetRecall;
+            iMSset = iMSsetRecall;
+            EQset = EQsetRecall;
+            if (!iMSset && !EQset) iMSEQ = 0;
+            else if (iMSset && EQset) iMSEQ = 2;
+            else if (!iMSset && EQset) iMSEQ = 3;
+            else iMSEQ = 4;
+            doBW();
+            updateiMS();
+            updateEQ();
+            if (XDRGTKUSB || XDRGTKTCP) DataPrint("G" + String(!EQset) + String(!iMSset) + "\n");
+          }
           OStatusold = 1000;
           Stereostatusold = false;
           SStatusold = 2000;
@@ -2897,6 +2916,15 @@ void ButtonPress() {
             EQsettemp = !EQsettemp;
             playAccessibilityOnOffVoiceLite(EQsettemp);
           }
+          iMSset = iMSsettemp;
+          EQset = EQsettemp;
+          if (!iMSset && !EQset) iMSEQ = 0;
+          else if (iMSset && EQset) iMSEQ = 2;
+          else if (!iMSset && EQset) iMSEQ = 3;
+          else iMSEQ = 4;
+          updateiMS();
+          updateEQ();
+          if (XDRGTKUSB || XDRGTKTCP) DataPrint("G" + String(!EQset) + String(!iMSset) + "\n");
           showBWSelector();
           if (band < BAND_GAP) {
             drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp || (BWsettemp == 17 && BWtemp == 0) || (BWsettemp == 18 && !iMSsettemp) || (BWsettemp == 19 && !EQsettemp) ? true : false), true);
@@ -2904,8 +2932,8 @@ void ButtonPress() {
             drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp || (BWsettemp == 17 && BWtemp == 0) || (BWsettemp == 18 && !iMSsettemp) || (BWsettemp == 19 && !EQsettemp) ? true : false), true);
           }
         } else if (BWsettemp == 20) {
-          bool bwChanged = (BWset != BWtemp);
-          bool imsEqChanged = (iMSset != iMSsettemp) || (EQset != EQsettemp);
+          bool bwChanged = (BWsetRecall != BWtemp);
+          bool imsEqChanged = (iMSsetRecall != iMSsettemp) || (EQsetRecall != EQsettemp);
 
           BWset = BWtemp;
           iMSset = iMSsettemp;
@@ -2922,9 +2950,13 @@ void ButtonPress() {
           }
 
           if (bwChanged) {
-            doBW();
-          } else if (imsEqChanged) {
-            EEPROM.commit();
+            if (band < BAND_GAP) {
+              BWsetFM = BWset;
+              EEPROM.writeByte(EE_BYTE_BWSET_FM, BWsetFM);
+            } else {
+              BWsetAM = BWset;
+              EEPROM.writeByte(EE_BYTE_BWSET_AM, BWsetAM);
+            }
           }
 
           if (imsEqChanged) {
@@ -2932,12 +2964,15 @@ void ButtonPress() {
             updateEQ();
             if (XDRGTKUSB || XDRGTKTCP) DataPrint("G" + String(!EQset) + String(!iMSset) + "\n");
           }
+          if (bwChanged || imsEqChanged) EEPROM.commit();
 
           BuildDisplay();
           freq_in = 0;
           SelectBand();
         } else {
           BWtemp = BWsettemp;
+          BWset = BWtemp;
+          doBW();
           showBWSelector();
           if (band < BAND_GAP) {
             drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp || (BWsettemp == 17 && BWtemp == 0) || (BWsettemp == 18 && !iMSsettemp) || (BWsettemp == 19 && !EQsettemp) ? true : false), true);
@@ -4029,6 +4064,7 @@ void updateSWMIBand() {
 
 void doBW() {
   if (BWtune && !bwtouchtune) BWset = BWtemp;
+  bool persist = !BWtune;
 
   if (band < BAND_GAP) {
     if (BWset > 16) BWset = 0;
@@ -4052,7 +4088,7 @@ void doBW() {
       case 16: radio.setFMBandw(311); break;
     }
     BWsetFM = BWset;
-    EEPROM.writeByte(EE_BYTE_BWSET_FM, BWsetFM);
+    if (persist) EEPROM.writeByte(EE_BYTE_BWSET_FM, BWsetFM);
 
     if ((XDRGTKUSB || XDRGTKTCP) && !XDRScan) {
       switch (BWset) {
@@ -4085,12 +4121,12 @@ void doBW() {
       case 4: radio.setAMBandw(8); break;
     }
     BWsetAM = BWset;
-    EEPROM.writeByte(EE_BYTE_BWSET_AM, BWsetAM);
+    if (persist) EEPROM.writeByte(EE_BYTE_BWSET_AM, BWsetAM);
   }
   updateBW();
   playAccessibilityBWVoiceLite();
   BWreset = true;
-  EEPROM.commit();
+  if (persist) EEPROM.commit();
 }
 
 void doBWtuneDown() {

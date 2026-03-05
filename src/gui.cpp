@@ -3526,8 +3526,11 @@ void ShowOneButton(byte position, byte item, bool selected) {
 void BuildBWSelector() {
   BWsettemp = BWset;
   BWtemp = BWset;
+  BWsetRecall = BWset;
   iMSsettemp = iMSset;
+  iMSsetRecall = iMSset;
   EQsettemp = EQset;
+  EQsetRecall = EQset;
   switch (CurrentTheme) {
     case 7: tft.pushImage (0, 0, 320, 240, configurationbackground_wo); break;
     default: tft.pushImage (0, 0, 320, 240, configurationbackground); break;
