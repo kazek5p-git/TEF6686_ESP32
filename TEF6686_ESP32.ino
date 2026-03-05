@@ -191,6 +191,7 @@ byte displayflip;
 byte ECCold;
 byte eonptyold[20];
 byte EQset;
+byte EQsettemp;
 byte fmagc;
 byte fmscansens;
 byte fmdefaultstepsize;
@@ -213,6 +214,7 @@ byte accessibilityTestMode;
 byte items[11] = {10, static_cast<byte>(dynamicspi ? 10 : 9), 8, 10, 10, 10, 9, 10, 10, 9, 10};
 byte iMSEQ;
 byte iMSset;
+byte iMSsettemp;
 byte language;
 byte licold;
 byte longbandpress;
@@ -2888,40 +2890,59 @@ void ButtonPress() {
       if (BWtune) {
         if (BWsettemp == 18 || BWsettemp == 19) {
           if (BWsettemp == 18) {
-            iMSset = !iMSset;
-            playAccessibilityOnOffVoiceLite(iMSset);
+            iMSsettemp = !iMSsettemp;
+            playAccessibilityOnOffVoiceLite(iMSsettemp);
           }
           if (BWsettemp == 19) {
-            EQset = !EQset;
-            playAccessibilityOnOffVoiceLite(EQset);
+            EQsettemp = !EQsettemp;
+            playAccessibilityOnOffVoiceLite(EQsettemp);
           }
+          showBWSelector();
+          if (band < BAND_GAP) {
+            drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp || (BWsettemp == 17 && BWtemp == 0) || (BWsettemp == 18 && !iMSsettemp) || (BWsettemp == 19 && !EQsettemp) ? true : false), true);
+          } else {
+            drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp || (BWsettemp == 17 && BWtemp == 0) || (BWsettemp == 18 && !iMSsettemp) || (BWsettemp == 19 && !EQsettemp) ? true : false), true);
+          }
+        } else if (BWsettemp == 20) {
+          bool bwChanged = (BWset != BWtemp);
+          bool imsEqChanged = (iMSset != iMSsettemp) || (EQset != EQsettemp);
+
+          BWset = BWtemp;
+          iMSset = iMSsettemp;
+          EQset = EQsettemp;
+
           if (!iMSset && !EQset) iMSEQ = 0;
           else if (iMSset && EQset) iMSEQ = 2;
           else if (!iMSset && EQset) iMSEQ = 3;
           else iMSEQ = 4;
-          EEPROM.writeByte(EE_BYTE_IMSSET, iMSset);
-          EEPROM.writeByte(EE_BYTE_EQSET, EQset);
-          EEPROM.commit();
-          updateiMS();
-          updateEQ();
-          if (XDRGTKUSB || XDRGTKTCP) DataPrint("G" + String(!EQset) + String(!iMSset) + "\n");
-          showBWSelector();
-          if (band < BAND_GAP) {
-            drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp || (BWsettemp == 17 && BWset == 0) || (BWsettemp == 18 && !iMSset) || (BWsettemp == 19 && !EQset) ? true : false), true);
-          } else {
-            drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp || (BWsettemp == 17 && BWset == 0) || (BWsettemp == 18 && !iMSset) || (BWsettemp == 19 && !EQset) ? true : false), true);
+
+          if (imsEqChanged) {
+            EEPROM.writeByte(EE_BYTE_IMSSET, iMSset);
+            EEPROM.writeByte(EE_BYTE_EQSET, EQset);
           }
-        } else if (BWsettemp == 20) {
+
+          if (bwChanged) {
+            doBW();
+          } else if (imsEqChanged) {
+            EEPROM.commit();
+          }
+
+          if (imsEqChanged) {
+            updateiMS();
+            updateEQ();
+            if (XDRGTKUSB || XDRGTKTCP) DataPrint("G" + String(!EQset) + String(!iMSset) + "\n");
+          }
+
           BuildDisplay();
           freq_in = 0;
           SelectBand();
         } else {
-          doBW();
+          BWtemp = BWsettemp;
           showBWSelector();
           if (band < BAND_GAP) {
-            drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp || (BWsettemp == 17 && BWset == 0) || (BWsettemp == 18 && !iMSset) || (BWsettemp == 19 && !EQset) ? true : false), true);
+            drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp || (BWsettemp == 17 && BWtemp == 0) || (BWsettemp == 18 && !iMSsettemp) || (BWsettemp == 19 && !EQsettemp) ? true : false), true);
           } else {
-            drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp || (BWsettemp == 17 && BWset == 0) || (BWsettemp == 18 && !iMSset) || (BWsettemp == 19 && !EQset) ? true : false), true);
+            drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp || (BWsettemp == 17 && BWtemp == 0) || (BWsettemp == 18 && !iMSsettemp) || (BWsettemp == 19 && !EQsettemp) ? true : false), true);
           }
         }
       }
@@ -4007,7 +4028,7 @@ void updateSWMIBand() {
 }
 
 void doBW() {
-  if (BWtune && !bwtouchtune) BWset = BWsettemp;
+  if (BWtune && !bwtouchtune) BWset = BWtemp;
 
   if (band < BAND_GAP) {
     if (BWset > 16) BWset = 0;
@@ -4075,15 +4096,15 @@ void doBW() {
 void doBWtuneDown() {
   rotary = 0;
   if (band < BAND_GAP) {
-    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp || (BWsettemp == 17 && BWset == 0) || (BWsettemp == 18 && !iMSset) || (BWsettemp == 19 && !EQset) ? true : false), false);
+    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp || (BWsettemp == 17 && BWtemp == 0) || (BWsettemp == 18 && !iMSsettemp) || (BWsettemp == 19 && !EQsettemp) ? true : false), false);
     BWsettemp--;
     if (BWsettemp > 20 || BWsettemp == 0) BWsettemp = 20;
-    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp || (BWsettemp == 17 && BWset == 0) || (BWsettemp == 18 && !iMSset) || (BWsettemp == 19 && !EQset) ? true : false), true);
+    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp || (BWsettemp == 17 && BWtemp == 0) || (BWsettemp == 18 && !iMSsettemp) || (BWsettemp == 19 && !EQsettemp) ? true : false), true);
   } else {
-    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp ? true : false), false);
+    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp ? true : false), false);
     BWsettemp--;
     if (BWsettemp > 4 && BWsettemp < 20) BWsettemp = 4; else if (BWsettemp == 0) BWsettemp = 20;
-    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp ? true : false), true);
+    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp ? true : false), true);
   }
   playAccessibilityBWSelectorCursorVoiceLite();
 }
@@ -4091,15 +4112,15 @@ void doBWtuneDown() {
 void doBWtuneUp() {
   rotary = 0;
   if (band < BAND_GAP) {
-    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp || (BWsettemp == 17 && BWset == 0) || (BWsettemp == 18 && !iMSset) || (BWsettemp == 19 && !EQset) ? true : false), false);
+    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp || (BWsettemp == 17 && BWtemp == 0) || (BWsettemp == 18 && !iMSsettemp) || (BWsettemp == 19 && !EQsettemp) ? true : false), false);
     BWsettemp++;
     if (BWsettemp > 20) BWsettemp = 1;
-    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp || (BWsettemp == 17 && BWset == 0) || (BWsettemp == 18 && !iMSset) || (BWsettemp == 19 && !EQset) ? true : false), true);
+    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsFM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp || (BWsettemp == 17 && BWtemp == 0) || (BWsettemp == 18 && !iMSsettemp) || (BWsettemp == 19 && !EQsettemp) ? true : false), true);
   } else {
-    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp ? true : false), false);
+    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp ? true : false), false);
     BWsettemp++;
     if (BWsettemp > 4 && BWsettemp < 20) BWsettemp = 20; else if (BWsettemp > 20) BWsettemp = 1;
-    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWset == BWsettemp ? true : false), true);
+    drawButton((BWsettemp == 20 ? "OK" : BWButtonLabelsAM[BWsettemp - 1]), BWsettemp - 1, (BWtemp == BWsettemp ? true : false), true);
   }
   playAccessibilityBWSelectorCursorVoiceLite();
 }

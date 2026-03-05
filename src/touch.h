@@ -26,8 +26,11 @@ extern byte band;
 extern byte BWset;
 extern byte BWtemp;
 extern byte EQset;
+extern byte EQsettemp;
 extern byte iMSEQ;
 extern byte iMSset;
+extern byte iMSsettemp;
+extern byte BWsettemp;
 extern byte menuitem;
 extern byte items[11];
 extern byte menupage;
@@ -58,5 +61,7 @@ extern void updateEQ();
 extern void DataPrint(String string);
 extern void BuildAFScreen();
 extern void ShowFreq(int mode);
+extern void playAccessibilityOnOffVoiceLite(bool enabled);
+extern void playAccessibilityBWSelectorCursorVoiceLite();
 
 #endif

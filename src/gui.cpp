@@ -3525,6 +3525,9 @@ void ShowOneButton(byte position, byte item, bool selected) {
 
 void BuildBWSelector() {
   BWsettemp = BWset;
+  BWtemp = BWset;
+  iMSsettemp = iMSset;
+  EQsettemp = EQset;
   switch (CurrentTheme) {
     case 7: tft.pushImage (0, 0, 320, 240, configurationbackground_wo); break;
     default: tft.pushImage (0, 0, 320, 240, configurationbackground); break;
@@ -3534,14 +3537,18 @@ void BuildBWSelector() {
 }
 
 void showBWSelector() {
+  const byte bwSelected = (BWtune ? BWtemp : BWset);
+  const byte imsSelected = (BWtune ? iMSsettemp : iMSset);
+  const byte eqSelected = (BWtune ? EQsettemp : EQset);
+
   if (band < BAND_GAP) {
-    for (int x = 0; x < 17; x++) drawButton(BWButtonLabelsFM[x], x, (BWset == x + 1 || (BWset == 0 && x == 16) ? true : false), false);
-    drawButton(BWButtonLabelsFM[17], 17, (!iMSset ? true : false), false);
-    drawButton(BWButtonLabelsFM[18], 18, (!EQset ? true : false), false);
+    for (int x = 0; x < 17; x++) drawButton(BWButtonLabelsFM[x], x, (bwSelected == x + 1 || (bwSelected == 0 && x == 16) ? true : false), false);
+    drawButton(BWButtonLabelsFM[17], 17, (!imsSelected ? true : false), false);
+    drawButton(BWButtonLabelsFM[18], 18, (!eqSelected ? true : false), false);
     drawButton("OK", 19, false, false);
   } else {
     for (int x = 0; x < 4; x++) {
-      drawButton(BWButtonLabelsAM[x], x, (BWset == x + 1 ? true : false), false);
+      drawButton(BWButtonLabelsAM[x], x, (bwSelected == x + 1 ? true : false), false);
     }
     drawButton("OK", 19, false, false);
   }

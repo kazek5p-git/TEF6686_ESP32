@@ -104,60 +104,173 @@ void doTouchEvent(uint16_t x, uint16_t y) {
     }
 
     if (BWtune) {                                                         // BW menu
+      bool selectorChanged = false;
+      bool playCursorCue = false;
+
       if (y > 35 && y < 65) {
-        if (x > 7 && x < 77) BWtemp = 1;
-        if (x > 87 && x < 157) BWtemp = 2;
-        if (x > 167 && x < 237) BWtemp = 3;
-        if (x > 247 && x < 317) BWtemp = 4;
+        if (x > 7 && x < 77) {
+          BWtemp = 1;
+          BWsettemp = 1;
+          selectorChanged = true;
+          playCursorCue = true;
+        }
+        if (x > 87 && x < 157) {
+          BWtemp = 2;
+          BWsettemp = 2;
+          selectorChanged = true;
+          playCursorCue = true;
+        }
+        if (x > 167 && x < 237) {
+          BWtemp = 3;
+          BWsettemp = 3;
+          selectorChanged = true;
+          playCursorCue = true;
+        }
+        if (x > 247 && x < 317) {
+          BWtemp = 4;
+          BWsettemp = 4;
+          selectorChanged = true;
+          playCursorCue = true;
+        }
       }
       if (band < BAND_GAP) {
         if (y > 75 && y < 105) {
-          if (x > 7 && x < 77) BWtemp = 5;
-          if (x > 87 && x < 157) BWtemp = 6;
-          if (x > 167 && x < 237) BWtemp = 7;
-          if (x > 247 && x < 317) BWtemp = 8;
+          if (x > 7 && x < 77) {
+            BWtemp = 5;
+            BWsettemp = 5;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
+          if (x > 87 && x < 157) {
+            BWtemp = 6;
+            BWsettemp = 6;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
+          if (x > 167 && x < 237) {
+            BWtemp = 7;
+            BWsettemp = 7;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
+          if (x > 247 && x < 317) {
+            BWtemp = 8;
+            BWsettemp = 8;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
         }
 
         if (y > 115 && y < 145) {
-          if (x > 7 && x < 77) BWtemp = 9;
-          if (x > 87 && x < 157) BWtemp = 10;
-          if (x > 167 && x < 237) BWtemp = 11;
-          if (x > 247 && x < 317) BWtemp = 12;
+          if (x > 7 && x < 77) {
+            BWtemp = 9;
+            BWsettemp = 9;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
+          if (x > 87 && x < 157) {
+            BWtemp = 10;
+            BWsettemp = 10;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
+          if (x > 167 && x < 237) {
+            BWtemp = 11;
+            BWsettemp = 11;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
+          if (x > 247 && x < 317) {
+            BWtemp = 12;
+            BWsettemp = 12;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
         }
 
         if (y > 155 && y < 185) {
-          if (x > 7 && x < 77) BWtemp = 13;
-          if (x > 87 && x < 157) BWtemp = 14;
-          if (x > 167 && x < 237) BWtemp = 15;
-          if (x > 247 && x < 317) BWtemp = 16;
+          if (x > 7 && x < 77) {
+            BWtemp = 13;
+            BWsettemp = 13;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
+          if (x > 87 && x < 157) {
+            BWtemp = 14;
+            BWsettemp = 14;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
+          if (x > 167 && x < 237) {
+            BWtemp = 15;
+            BWsettemp = 15;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
+          if (x > 247 && x < 317) {
+            BWtemp = 16;
+            BWsettemp = 16;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
         }
 
         if (y > 195 && y < 225) {
-          if (x > 7 && x < 77) BWtemp = 0;
-          if (x > 87 && x < 157) iMSset = !iMSset;
-          if (x > 167 && x < 237) EQset = !EQset;
-          if ((x > 87 && x < 157) || (x > 167 && x < 237)) {
-            if (!iMSset && !EQset) iMSEQ = 0;
-            else if (iMSset && EQset) iMSEQ = 2;
-            else if (!iMSset && EQset) iMSEQ = 3;
-            else iMSEQ = 4;
-            EEPROM.writeByte(EE_BYTE_IMSSET, iMSset);
-            EEPROM.writeByte(EE_BYTE_EQSET, EQset);
-            EEPROM.commit();
-            updateiMS();
-            updateEQ();
-            if (XDRGTKUSB || XDRGTKTCP) DataPrint("G" + String(!EQset) + String(!iMSset) + "\n");
+          if (x > 7 && x < 77) {
+            BWtemp = 0;
+            BWsettemp = 17;
+            selectorChanged = true;
+            playCursorCue = true;
+          }
+          if (x > 87 && x < 157) {
+            iMSsettemp = !iMSsettemp;
+            BWsettemp = 18;
+            selectorChanged = true;
+            playAccessibilityOnOffVoiceLite(iMSsettemp);
+          }
+          if (x > 167 && x < 237) {
+            EQsettemp = !EQsettemp;
+            BWsettemp = 19;
+            selectorChanged = true;
+            playAccessibilityOnOffVoiceLite(EQsettemp);
           }
         }
       }
 
       if (y > 195 && y < 225 && x > 247 && x < 317) {
-        leave = true;
-        bwtouchtune = true;
+        bool bwChanged = (BWset != BWtemp);
+        bool imsEqChanged = (iMSset != iMSsettemp) || (EQset != EQsettemp);
+
         BWset = BWtemp;
-        doBW();
+        iMSset = iMSsettemp;
+        EQset = EQsettemp;
+
+        if (!iMSset && !EQset) iMSEQ = 0;
+        else if (iMSset && EQset) iMSEQ = 2;
+        else if (!iMSset && EQset) iMSEQ = 3;
+        else iMSEQ = 4;
+
+        if (imsEqChanged) {
+          EEPROM.writeByte(EE_BYTE_IMSSET, iMSset);
+          EEPROM.writeByte(EE_BYTE_EQSET, EQset);
+        }
+
+        if (bwChanged) {
+          bwtouchtune = true;
+          doBW();
+          bwtouchtune = false;
+        } else if (imsEqChanged) {
+          EEPROM.commit();
+        }
+
+        if (imsEqChanged) {
+          updateiMS();
+          updateEQ();
+          if (XDRGTKUSB || XDRGTKTCP) DataPrint("G" + String(!EQset) + String(!iMSset) + "\n");
+        }
+
+        leave = true;
         BWtune = false;
-        bwtouchtune = false;
         if (advancedRDS) {
           BuildAdvancedRDS();
         } else if (afscreen) {
@@ -166,12 +279,11 @@ void doTouchEvent(uint16_t x, uint16_t y) {
           BuildDisplay();
           SelectBand();
         }
-      } else {
-        bwtouchtune = true;
-        BWset = BWtemp;
+      } else if (selectorChanged) {
         showBWSelector();
-        doBW();
-        bwtouchtune = false;
+        if (playCursorCue) {
+          playAccessibilityBWSelectorCursorVoiceLite();
+        }
       }
       return;
     }
