@@ -16,10 +16,18 @@ More information: https://www.pe5pvb.nl/tef6686/
 - [How to use the FM DX scanner](https://github.com/PE5PVB/TEF6686_ESP32/wiki/How-to-use-the-FM-DX-scanner)
 - [Menu options explained](https://github.com/PE5PVB/TEF6686_ESP32/wiki/Menu-options-explained)
 
+## Fork Status
+This fork stays close to `PE5PVB/TEF6686_ESP32`, but packages extra work around accessibility, safer BW selector behavior, and FlashWizard polish.
+
+If you want a tested binary, use the public release packages instead of the branch tip.
+Current public package: `v2026.03.06-a11y-final-r7`.
+Important: `r7` is a docs cleanup pack; firmware behavior is the same as `v2026.03.06-a11y-final-r6`.
+
 ## Accessibility
 This firmware includes an optional audio accessibility layer for blind and low-vision users.
 
 What it adds in practice:
+- fresh installs keep accessibility cues OFF until you enable them
 - variable-pitch navigation cues in menus and submenus, so you can hear your relative position from beginning to end
 - clear menu state cues for `enter`, `back`, `exit`, and `confirm`
 - consistent toggle pattern: `ON = low -> high`, `OFF = high -> low`
@@ -40,9 +48,11 @@ BW selector notes (important for audio navigation):
 - In `AM` selector, order is: AM filter values and final `OK` (last/highest-tone item).
 
 ## Fork Docs
+- [Blind User Quick Start](docs/BLIND_USER_QUICK_START.md)
+- [Fork User Guide](docs/FORK_USER_GUIDE.md)
+- [Fork Release Index](docs/FORK_RELEASES.md)
 - [Accessibility Upstream Integration Guide](docs/ACCESSIBILITY_UPSTREAM_INTEGRATION_GUIDE.md)
 - [Issue Draft: Accessibility Plan](docs/ISSUE_DRAFT_ACCESSIBILITY_PLAN.md)
-- [Fork Release Index](docs/FORK_RELEASES.md)
 
 ## Regression Checklist (2026-03-04)
 | Area | Expected behavior | Status |
